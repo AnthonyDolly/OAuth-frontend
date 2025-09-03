@@ -3,9 +3,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: oauth-frontend
-    ports:
-      - "4200:80"
+    container_name: oauth-frontend-prod  # Cambié el nombre para coincidir con nginx config
+    # ports:  # ⚠️ QUITAR - No necesitas exponer puertos, el proxy se encarga
+    #   - "4200:80"
     env_file:
       - .env
     environment:
@@ -13,9 +13,8 @@ services:
       - BASE_URL=${BASE_URL}
     restart: unless-stopped
     networks:
-      - oauth-network
+      - proxy-network  # ⚠️ CAMBIO IMPORTANTE: Usar la red del proxy
 
 networks:
-  oauth-network:
-    driver: bridge
-    name: oauth-network
+  proxy-network:  # ⚠️ CAMBIO: Conectar a la red externa del proxy
+    external: true
