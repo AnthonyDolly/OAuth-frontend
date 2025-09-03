@@ -1,0 +1,21 @@
+services:
+  oauth-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: oauth-frontend
+    ports:
+      - "4200:80"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - BASE_URL=${BASE_URL}
+    restart: unless-stopped
+    networks:
+      - oauth-network
+
+networks:
+  oauth-network:
+    driver: bridge
+    name: oauth-network

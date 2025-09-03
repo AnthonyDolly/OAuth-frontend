@@ -1,0 +1,30 @@
+<div class="callback-container">
+  <div class="callback-card">
+    <!-- Loading state -->
+    <div *ngIf="loading" class="loading-content">
+      <div class="loading-spinner"></div>
+      <h2>Procesando autenticación...</h2>
+      <p>Por favor espera mientras verificamos tu información.</p>
+    </div>
+
+    <!-- Success state -->
+    <div *ngIf="success && !loading" class="success-content">
+      <div class="success-icon">✅</div>
+      <h2>¡Autenticación exitosa!</h2>
+      <p>Serás redirigido al dashboard en unos segundos.</p>
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div *ngIf="error && !loading" class="error-content">
+      <div class="error-icon">❌</div>
+      <h2>Error en la autenticación</h2>
+      <p>{{ error }}</p>
+      <button class="btn btn-primary" (click)="goToLogin()">
+        Volver al login
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,239 @@
+<div class="admin-container">
+  <!-- Header -->
+  <div class="admin-header">
+    <div class="header-content">
+      <div class="header-info">
+        <button class="back-btn" routerLink="/dashboard">
+          ← Volver al Dashboard
+        </button>
+        <h1>Logs de Auditoría</h1>
+        <p>Registro de actividad del sistema</p>
+      </div>
+      
+      <div class="header-actions">
+        <button class="btn btn-outline" (click)="exportLogs()" [disabled]="loading">
+          📥 Exportar CSV
+        </button>
+        <button class="btn btn-primary" (click)="loadLogs()" [disabled]="loading">
+          <span *ngIf="!loading">🔄 Actualizar</span>
+          <span *ngIf="loading">Cargando...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="admin-nav">
+    <nav class="nav-content">
+      <a routerLink="/admin/stats" routerLinkActive="active" class="nav-item">
+        📊 Estadísticas
+      </a>
+      <a routerLink="/admin/users" routerLinkActive="active" class="nav-item">
+        👥 Usuarios
+      </a>
+      <a routerLink="/admin/audit-logs" routerLinkActive="active" class="nav-item">
+        📋 Logs de Auditoría
+      </a>
+    </nav>
+  </div>
+
+  <div class="admin-content">
+    <!-- Messages -->
+    <div class="success-message" *ngIf="success">
+      <i class="success-icon">✅</i>
+      {{ success }}
+    </div>
+
+    <div class="error-message" *ngIf="error">
+      <i class="error-icon">⚠️</i>
+      {{ error }}
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-section">
+      <form [formGroup]="filterForm" class="filters-form">
+        <div class="filter-group">
+          <label for="userId">ID de Usuario</label>
+          <input
+            id="userId"
+            type="text"
+            formControlName="userId"
+            placeholder="UUID del usuario..."
+          >
+        </div>
+
+        <div class="filter-group">
+          <label for="action">Acción</label>
+          <select id="action" formControlName="action">
+            <option value="">Todas las acciones</option>
+            <option value="login">Inicio de sesión</option>
+            <option value="logout">Cierre de sesión</option>
+            <option value="register">Registro</option>
+            <option value="password_change">Cambio contraseña</option>
+            <option value="profile_update">Actualizar perfil</option>
+            <option value="2fa_enable">Habilitar 2FA</option>
+            <option value="2fa_disable">Deshabilitar 2FA</option>
+            <option value="oauth_link">Vincular OAuth</option>
+            <option value="oauth_unlink">Desvincular OAuth</option>
+            <option value="admin_action">Acción admin</option>
+            <option value="user_suspend">Suspender usuario</option>
+            <option value="user_activate">Activar usuario</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="success">Estado</label>
+          <select id="success" formControlName="success">
+            <option value="">Todos los estados</option>
+            <option value="true">Éxito</option>
+            <option value="false">Error</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="from">Desde</label>
+          <input id="from" type="datetime-local" formControlName="from">
+        </div>
+
+        <div class="filter-group">
+          <label for="to">Hasta</label>
+          <input id="to" type="datetime-local" formControlName="to">
+        </div>
+
+        <div class="filter-actions">
+          <button type="button" class="btn btn-outline" (click)="clearFilters()">
+            Limpiar
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary-section">
+      <div class="summary-info">
+        <span class="total-count">{{ totalLogs | number }} logs encontrados</span>
+        <span class="page-info">
+          Página {{ currentPage }} de {{ totalPages }}
+        </span>
+      </div>
+      
+      <div class="page-size-selector">
+        <label>Mostrar:</label>
+        <select (change)="onPageSizeChange($event)" [value]="pageSize">
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="200">200</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-container" *ngIf="loading">
+      <div class="loading-spinner"></div>
+      <p>Cargando logs de auditoría...</p>
+    </div>
+
+    <!-- Logs Table -->
+    <div class="logs-table-container" *ngIf="!loading">
+      <div class="table-wrapper">
+        <table class="logs-table">
+          <thead>
+            <tr>
+              <th>Fecha y Hora</th>
+              <th>Usuario</th>
+              <th>Acción</th>
+              <th>Estado</th>
+              <th>IP Address</th>
+              <th>Detalles</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of logs" class="log-row" [class.success]="log.success" [class.error]="!log.success">
+              <td class="log-timestamp">
+                <div class="timestamp-info">
+                  {{ formatDate(log.created_at) }}
+                </div>
+              </td>
+
+              <td class="log-user">
+                <div class="user-info" *ngIf="log.user">
+                  <strong>{{ log.user.display_name || log.user.email }}</strong>
+                  <small>{{ log.user.email }}</small>
+                </div>
+                <div class="user-info" *ngIf="!log.user">
+                  <small class="user-id">{{ log.user_id }}</small>
+                </div>
+              </td>
+
+              <td class="log-action">
+                <div class="action-info">
+                  <span class="action-icon">{{ getActionIcon(log.action) }}</span>
+                  <span class="action-text">{{ getActionText(log.action) }}</span>
+                </div>
+              </td>
+
+              <td class="log-status">
+                <div class="status-badge" [style.color]="getActionColor(log.success)">
+                  {{ log.success ? '✅ Éxito' : '❌ Error' }}
+                </div>
+              </td>
+
+              <td class="log-ip">
+                <span class="ip-address">{{ log.ip_address }}</span>
+              </td>
+
+              <td class="log-details">
+                <div class="details-content">
+                  {{ formatDetails(log.details) }}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="logs.length === 0">
+          <div class="empty-icon">📋</div>
+          <h3>No se encontraron logs</h3>
+          <p>Intenta ajustar los filtros de búsqueda o el rango de fechas</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-section" *ngIf="!loading && logs.length > 0">
+      <div class="pagination">
+        <button 
+          class="btn btn-outline btn-sm"
+          (click)="changePage(currentPage - 1)"
+          [disabled]="currentPage === 1"
+        >
+          ← Anterior
+        </button>
+
+        <button
+          *ngFor="let page of getPaginationRange()"
+          class="btn btn-sm"
+          [class.btn-primary]="page === currentPage"
+          [class.btn-outline]="page !== currentPage"
+          (click)="changePage(page)"
+        >
+          {{ page }}
+        </button>
+
+        <button 
+          class="btn btn-outline btn-sm"
+          (click)="changePage(currentPage + 1)"
+          [disabled]="currentPage === totalPages"
+        >
+          Siguiente →
+        </button>
+      </div>
+
+      <div class="pagination-info">
+        Mostrando {{ ((currentPage - 1) * pageSize) + 1 }} - {{ getEndRange() }} de {{ totalLogs }}
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,164 @@
+<div class="admin-container">
+  <!-- Header -->
+  <div class="admin-header">
+    <div class="header-content">
+      <div class="header-info">
+        <button class="back-btn" routerLink="/dashboard">
+          ← Volver al Dashboard
+        </button>
+        <h1>Panel de Administración</h1>
+        <p>Estadísticas generales del sistema</p>
+      </div>
+      
+      <div class="header-actions">
+        <button class="btn btn-outline" (click)="refreshStats()" [disabled]="loading">
+          <span *ngIf="!loading">🔄 Actualizar</span>
+          <span *ngIf="loading">Cargando...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="admin-nav">
+    <nav class="nav-content">
+      <a routerLink="/admin/stats" routerLinkActive="active" class="nav-item">
+        📊 Estadísticas
+      </a>
+      <a routerLink="/admin/users" routerLinkActive="active" class="nav-item">
+        👥 Usuarios
+      </a>
+      <a routerLink="/admin/audit-logs" routerLinkActive="active" class="nav-item">
+        📋 Logs de Auditoría
+      </a>
+    </nav>
+  </div>
+
+  <div class="admin-content">
+    <!-- Error message -->
+    <div class="error-message" *ngIf="error">
+      <i class="error-icon">⚠️</i>
+      {{ error }}
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-container" *ngIf="loading">
+      <div class="loading-spinner"></div>
+      <p>Cargando estadísticas...</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-container" *ngIf="stats && !loading">
+      <div class="stats-grid">
+        <div class="stat-card users">
+          <div class="stat-icon">👥</div>
+          <div class="stat-content">
+            <h3>Total de Usuarios</h3>
+            <div class="stat-number">{{ stats.userCount | number }}</div>
+            <p>Usuarios registrados en el sistema</p>
+          </div>
+        </div>
+
+        <div class="stat-card oauth">
+          <div class="stat-icon">🔗</div>
+          <div class="stat-content">
+            <h3>Cuentas OAuth</h3>
+            <div class="stat-number">{{ stats.oauthCount | number }}</div>
+            <p>Cuentas OAuth vinculadas</p>
+          </div>
+        </div>
+
+        <div class="stat-card sessions">
+          <div class="stat-icon">🔐</div>
+          <div class="stat-content">
+            <h3>Sesiones Activas</h3>
+            <div class="stat-number">{{ stats.activeSessions | number }}</div>
+            <p>Usuarios conectados actualmente</p>
+          </div>
+        </div>
+
+        <div class="stat-card ratio">
+          <div class="stat-icon">📈</div>
+          <div class="stat-content">
+            <h3>Ratio OAuth</h3>
+            <div class="stat-number">{{ getOAuthRatio() }}%</div>
+            <p>Porcentaje de usuarios con OAuth</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <h2>Acciones Rápidas</h2>
+        <div class="actions-grid">
+          <a routerLink="/admin/users" class="action-card">
+            <div class="action-icon">👥</div>
+            <div class="action-content">
+              <h3>Gestionar Usuarios</h3>
+              <p>Ver, editar y administrar cuentas de usuario</p>
+            </div>
+            <div class="action-arrow">→</div>
+          </a>
+
+          <a routerLink="/admin/audit-logs" class="action-card">
+            <div class="action-icon">📋</div>
+            <div class="action-content">
+              <h3>Revisar Logs</h3>
+              <p>Auditar actividad del sistema</p>
+            </div>
+            <div class="action-arrow">→</div>
+          </a>
+
+          <button class="action-card" (click)="refreshStats()">
+            <div class="action-icon">🔄</div>
+            <div class="action-content">
+              <h3>Actualizar Datos</h3>
+              <p>Refrescar estadísticas del sistema</p>
+            </div>
+            <div class="action-arrow">→</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- System Health -->
+      <div class="system-health">
+        <h2>Estado del Sistema</h2>
+        <div class="health-indicators">
+          <div class="health-item">
+            <div class="health-icon status-good">✅</div>
+            <div class="health-info">
+              <h4>Base de Datos</h4>
+              <p>Operativa</p>
+            </div>
+          </div>
+
+          <div class="health-item">
+            <div class="health-icon status-good">✅</div>
+            <div class="health-info">
+              <h4>API</h4>
+              <p>Respondiendo correctamente</p>
+            </div>
+          </div>
+
+          <div class="health-item">
+            <div class="health-icon status-good">✅</div>
+            <div class="health-info">
+              <h4>Autenticación</h4>
+              <p>OAuth funcionando</p>
+            </div>
+          </div>
+
+          <div class="health-item">
+            <div class="health-icon" [class]="getSessionHealthStatus()">
+              {{ getSessionHealthIcon() }}
+            </div>
+            <div class="health-info">
+              <h4>Sesiones</h4>
+              <p>{{ getSessionHealthText() }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

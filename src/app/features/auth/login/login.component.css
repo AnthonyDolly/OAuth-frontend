@@ -1,0 +1,311 @@
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.auth-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  padding: 40px;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.auth-header h1 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.auth-header p {
+  margin: 0;
+  color: #718096;
+  font-size: 16px;
+}
+
+.auth-form {
+  margin-bottom: 32px;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #2d3748;
+  font-size: 14px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group input.error {
+  border-color: #e53e3e;
+}
+
+.field-error {
+  margin-top: 8px;
+  color: #e53e3e;
+  font-size: 14px;
+}
+
+.form-text {
+  margin: 12px 0 8px 0;
+  font-size: 14px;
+  color: #718096;
+}
+
+.error-message {
+  background: #fed7d7;
+  color: #c53030;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.error-icon {
+  font-size: 16px;
+}
+
+.auth-button {
+  width: 100%;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.auth-button.primary {
+  background: #667eea;
+  color: white;
+}
+
+.auth-button.primary:hover:not(:disabled) {
+  background: #5a67d8;
+  transform: translateY(-1px);
+}
+
+.auth-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.oauth-section {
+  margin-bottom: 32px;
+}
+
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 24px 0;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.divider span {
+  background: white;
+  padding: 0 16px;
+  color: #718096;
+  font-size: 14px;
+}
+
+.oauth-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.oauth-button {
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  color: #2d3748;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.oauth-button:hover {
+  border-color: #cbd5e0;
+  transform: translateY(-1px);
+}
+
+.oauth-button.google:hover {
+  border-color: #ea4335;
+}
+
+.oauth-button.microsoft:hover {
+  border-color: #00a4ef;
+}
+
+.oauth-button.github:hover {
+  border-color: #24292e;
+}
+
+.oauth-button.linkedin:hover {
+  border-color: #0e76a8;
+}
+
+.oauth-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.oauth-icon svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Estilos específicos para los logos SVG */
+.oauth-button.microsoft {
+  background: #000000;
+  color: white;
+}
+
+.oauth-button.microsoft:hover {
+  background: #333333;
+  border-color: #333333;
+}
+
+.oauth-button.google {
+  background: white;
+  color: #757575;
+  border: 1px solid #dadce0;
+}
+
+.oauth-button.google:hover {
+  background: #f8f9fa;
+  border-color: #dadce0;
+}
+
+.oauth-button.github {
+  background: #24292e;
+  color: white;
+}
+
+.oauth-button.github:hover {
+  background: #1b1f23;
+  border-color: #1b1f23;
+}
+
+.oauth-button.linkedin {
+  background: #0077b5;
+  color: white;
+}
+
+.oauth-button.linkedin:hover {
+  background: #005885;
+  border-color: #005885;
+}
+
+.auth-links {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-links a {
+  color: #667eea;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.2s;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: inline-block;
+  margin: 4px 0;
+  background: rgba(102, 126, 234, 0.05);
+  border: 1px solid transparent;
+}
+
+.auth-links a:hover {
+  color: #5a67d8;
+  text-decoration: none;
+  background: rgba(102, 126, 234, 0.1);
+  border-color: rgba(102, 126, 234, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.1);
+}
+
+.auth-links a:active {
+  transform: translateY(0);
+}
+
+.link-icon {
+  margin-right: 6px;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 24px;
+  }
+  
+  .oauth-buttons {
+    grid-template-columns: 1fr;
+  }
+}

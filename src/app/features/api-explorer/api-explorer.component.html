@@ -1,0 +1,323 @@
+<!-- Header Section -->
+<div class="api-explorer-container">
+  <div class="api-header">
+    <div class="header-content">
+      <div class="header-info">
+        <h1>🚀 API Explorer</h1>
+        <p>Test and explore all available API endpoints</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Configuration Section -->
+  <div class="config-section">
+    <div class="config-card">
+      <div class="config-header">
+        <h2>⚙️ Configuration</h2>
+        <p>Configure your API connection settings</p>
+      </div>
+
+      <div class="config-grid">
+        <div class="config-group">
+          <label class="config-label">
+            <span class="label-icon">🌐</span>
+            Base URL
+          </label>
+          <input
+            type="text"
+            [(ngModel)]="base"
+            (change)="setBase()"
+            class="config-input"
+            placeholder="https://api.example.com"
+          />
+        </div>
+
+        <div class="config-group">
+          <label class="config-label">
+            <span class="label-icon">🔐</span>
+            Access Token
+          </label>
+          <input
+            type="text"
+            [(ngModel)]="accessToken"
+            class="config-input"
+            placeholder="Enter your access token"
+          />
+        </div>
+
+        <div class="config-actions">
+          <button (click)="setToken()" class="btn btn-primary">
+            💾 Save Token
+          </button>
+          <button (click)="clearToken()" class="btn btn-outline">
+            🗑️ Clear Token
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Endpoints Section -->
+  <div class="endpoints-section">
+    <div class="endpoints-header">
+      <h2>🔗 API Endpoints</h2>
+      <p>Click any endpoint to test it and see the response</p>
+    </div>
+
+    <div class="endpoints-grid">
+      <!-- System Endpoints -->
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <h3>🔧 System</h3>
+          <p>Basic system health and information</p>
+        </div>
+        <div class="endpoint-buttons">
+          <button (click)="runObservable(getHealth())" class="endpoint-btn get-btn">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/health</span>
+          </button>
+          <button (click)="runObservable(getVersion())" class="endpoint-btn get-btn">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/version</span>
+          </button>
+          <button (click)="runObservable(getDocs())" class="endpoint-btn get-btn">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/docs</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Auth Endpoints -->
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <h3>🔐 Authentication</h3>
+          <p>User authentication and session management</p>
+        </div>
+        <div class="endpoint-buttons">
+          <button (click)="runObservable(authRegister({ email: 'user@example.com', password: 'Password123!' }))" class="endpoint-btn post-btn">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/auth/register</span>
+          </button>
+          <button (click)="runObservable(authLogin({ email: 'user@example.com', password: 'Password123!', code: '123456', backup_code: 'ABCD1234' }))" class="endpoint-btn post-btn">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/auth/login</span>
+          </button>
+          <button (click)="runObservable(authRefresh({ refresh_token: '<refresh_token>' }))" class="endpoint-btn post-btn">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/auth/refresh</span>
+          </button>
+          <button (click)="runObservable(authLogout({ refresh_token: '<optional>', revoke_all: false }))" class="endpoint-btn post-btn">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/auth/logout</span>
+          </button>
+          <button (click)="runObservable(authVerifyEmail({ token: '<email_verify_token>' }))" class="endpoint-btn post-btn">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/auth/verify-email</span>
+          </button>
+          <button (click)="runObservable(authResendVerification({ email: 'user@example.com' }))" class="endpoint-btn post-btn">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/auth/resend-verification</span>
+          </button>
+          <button (click)="runObservable(authForgotPassword({ email: 'user@example.com' }))" class="endpoint-btn post-btn">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/auth/forgot-password</span>
+          </button>
+          <button (click)="runObservable(authResetPassword({ token: '<reset_token>', new_password: 'NewPass123!' }))" class="endpoint-btn post-btn">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/auth/reset-password</span>
+          </button>
+          <button (click)="runObservable(authChangePassword({ current_password: 'Password123!', new_password: 'NewPass123!' }))" class="endpoint-btn post-btn">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/auth/change-password</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- User Endpoints -->
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <h3>👤 User Management</h3>
+          <p>User profile, sessions, and OAuth accounts</p>
+        </div>
+        <div class="endpoint-buttons">
+          <button (click)="runObservable(getUserProfile())" class="endpoint-btn get-btn">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/user/profile</span>
+          </button>
+          <button (click)="runObservable(putUserProfile({ first_name: 'John', last_name: 'Doe' }))" class="endpoint-btn put-btn">
+            <span class="method-badge put">PUT</span>
+            <span class="endpoint-path">/user/profile</span>
+          </button>
+          <button (click)="runObservable(deleteUserProfile())" class="endpoint-btn delete-btn">
+            <span class="method-badge delete">DELETE</span>
+            <span class="endpoint-path">/user/profile</span>
+          </button>
+          <button (click)="runObservable(getUserSessions())" class="endpoint-btn get-btn">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/user/sessions</span>
+          </button>
+          <button (click)="runObservable(deleteUserSession('<sessionId>'))" class="endpoint-btn delete-btn">
+            <span class="method-badge delete">DELETE</span>
+            <span class="endpoint-path">/user/sessions/:id</span>
+          </button>
+          <button (click)="runObservable(deleteUserSessionsAll())" class="endpoint-btn delete-btn">
+            <span class="method-badge delete">DELETE</span>
+            <span class="endpoint-path">/user/sessions</span>
+          </button>
+          <button (click)="runObservable(getUserOauthAccounts())" class="endpoint-btn get-btn">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/user/oauth-accounts</span>
+          </button>
+          <button (click)="runObservable(linkUserOauthAccount({ provider: 'google', provider_id: '123', provider_email: 'user@gmail.com' }))" class="endpoint-btn post-btn">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/user/oauth-accounts/link</span>
+          </button>
+          <button (click)="runObservable(deleteUserOauthAccount('<accountId>'))" class="endpoint-btn delete-btn">
+            <span class="method-badge delete">DELETE</span>
+            <span class="endpoint-path">/user/oauth-accounts/:id</span>
+          </button>
+          <button (click)="runObservable(postEnable2fa())" class="endpoint-btn post-btn">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/user/enable-2fa</span>
+          </button>
+          <button (click)="runObservable(postDisable2fa())" class="endpoint-btn post-btn">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/user/disable-2fa</span>
+          </button>
+          <button (click)="runObservable(postVerify2fa({ code: '123456' }))" class="endpoint-btn post-btn">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/user/verify-2fa</span>
+          </button>
+          <button (click)="runObservable(postRegenerateBackupCodes())" class="endpoint-btn post-btn">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/user/backup-codes/regenerate</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- OAuth Providers Endpoints -->
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <h3>🌐 OAuth Providers</h3>
+          <p>Social login and OAuth integrations</p>
+        </div>
+        <div class="endpoint-buttons">
+          <button (click)="runObservable(getOauthGoogle())" class="endpoint-btn get-btn">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/oauth/google</span>
+          </button>
+          <button (click)="runObservable(getOauthGoogleCallback())" class="endpoint-btn get-btn">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/oauth/google/callback</span>
+          </button>
+          <button (click)="runObservable(getOauthMicrosoft())" class="endpoint-btn get-btn">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/oauth/microsoft</span>
+          </button>
+          <button (click)="runObservable(getOauthMicrosoftCallback())" class="endpoint-btn get-btn">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/oauth/microsoft/callback</span>
+          </button>
+          <button (click)="runObservable(getOauthGithub())" class="endpoint-btn get-btn">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/oauth/github</span>
+          </button>
+          <button (click)="runObservable(getOauthGithubCallback())" class="endpoint-btn get-btn">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/oauth/github/callback</span>
+          </button>
+          <button (click)="runObservable(getOauthLinkedin())" class="endpoint-btn get-btn">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/oauth/linkedin</span>
+          </button>
+          <button (click)="runObservable(getOauthLinkedinCallback())" class="endpoint-btn get-btn">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/oauth/linkedin/callback</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Admin Endpoints -->
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <h3>👑 Admin Panel</h3>
+          <p>Administrative functions and user management</p>
+        </div>
+        <div class="endpoint-buttons">
+          <button (click)="runObservable(getAdminUsers({ page: 1, limit: 20, status: 'active', q: '', email_verified: true }))" class="endpoint-btn get-btn">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/admin/users</span>
+          </button>
+          <button (click)="runObservable(getAdminUserById('<userId>'))" class="endpoint-btn get-btn">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/admin/users/:id</span>
+          </button>
+          <button (click)="runObservable(putAdminUserStatus('<userId>', { status: 'active' }))" class="endpoint-btn put-btn">
+            <span class="method-badge put">PUT</span>
+            <span class="endpoint-path">/admin/users/:id/status</span>
+          </button>
+          <button (click)="runObservable(putAdminUserAdmin('<userId>', { is_admin: true }))" class="endpoint-btn put-btn">
+            <span class="method-badge put">PUT</span>
+            <span class="endpoint-path">/admin/users/:id/admin</span>
+          </button>
+          <button (click)="runObservable(getAdminAuditLogs({ page: 1, limit: 50 }))" class="endpoint-btn get-btn">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/admin/audit-logs</span>
+          </button>
+          <button (click)="runObservable(getAdminStats())" class="endpoint-btn get-btn">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/admin/stats</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  <div class="results-section">
+    <div class="results-header">
+      <h2>📊 API Response</h2>
+      <p>View the results of your API calls here</p>
+    </div>
+
+    <div class="results-container">
+      <!-- Loading State -->
+      <div *ngIf="loading" class="result-loading">
+        <div class="loading-spinner">
+          <div class="spinner-ring"></div>
+          <div class="spinner-ring"></div>
+          <div class="spinner-ring"></div>
+          <div class="spinner-ring"></div>
+        </div>
+        <p>⏳ Making API call...</p>
+      </div>
+
+      <!-- Success Response -->
+      <div *ngIf="output && !loading" class="result-success">
+        <div class="result-header success">
+          <span class="result-icon">✅</span>
+          <span class="result-title">Success Response</span>
+        </div>
+        <pre class="result-content success">{{ output | json }}</pre>
+      </div>
+
+      <!-- Error Response -->
+      <div *ngIf="error && !loading" class="result-error">
+        <div class="result-header error">
+          <span class="result-icon">❌</span>
+          <span class="result-title">Error Response</span>
+        </div>
+        <pre class="result-content error">{{ error | json }}</pre>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!loading && !output && !error" class="result-empty">
+        <div class="empty-icon">🔍</div>
+        <h3>No Response Yet</h3>
+        <p>Click on any endpoint above to test the API</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+

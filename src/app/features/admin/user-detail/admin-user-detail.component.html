@@ -1,0 +1,279 @@
+<div class="admin-container">
+  <!-- Header -->
+  <div class="admin-header">
+    <div class="header-content">
+      <div class="header-info">
+        <button class="back-btn" routerLink="/admin/users">
+          ← Volver a Usuarios
+        </button>
+        <h1>Detalle del Usuario</h1>
+        <p *ngIf="user">Información completa de {{ getUserDisplayName() }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="admin-nav">
+    <nav class="nav-content">
+      <a routerLink="/admin/stats" routerLinkActive="active" class="nav-item">
+        📊 Estadísticas
+      </a>
+      <a routerLink="/admin/users" routerLinkActive="active" class="nav-item">
+        👥 Usuarios
+      </a>
+      <a routerLink="/admin/audit-logs" routerLinkActive="active" class="nav-item">
+        📋 Logs de Auditoría
+      </a>
+    </nav>
+  </div>
+
+  <div class="admin-content">
+    <!-- Messages -->
+    <div class="success-message" *ngIf="success">
+      <i class="success-icon">✅</i>
+      {{ success }}
+    </div>
+    
+    <div class="error-message" *ngIf="error">
+      <i class="error-icon">⚠️</i>
+      {{ error }}
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-container" *ngIf="loading">
+      <div class="loading-spinner"></div>
+      <p>Cargando información del usuario...</p>
+    </div>
+
+    <!-- User Detail -->
+    <div class="user-detail-container" *ngIf="user && !loading">
+      
+      <!-- User Profile Section -->
+      <div class="detail-section profile-section">
+        <div class="section-header">
+          <h2>Información Personal</h2>
+        </div>
+        
+        <div class="profile-content">
+          <div class="profile-avatar">
+            <div class="user-avatar">
+              <img *ngIf="user.avatar_url" [src]="user.avatar_url" [alt]="getUserDisplayName()">
+              <div *ngIf="!user.avatar_url" class="avatar-initials">
+                {{ getUserInitials() }}
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-info">
+            <div class="info-grid">
+              <div class="info-item">
+                <label>Nombre para mostrar</label>
+                <span>{{ user.display_name || '-' }}</span>
+              </div>
+
+              <div class="info-item">
+                <label>Nombre</label>
+                <span>{{ user.first_name || '-' }}</span>
+              </div>
+
+              <div class="info-item">
+                <label>Apellido</label>
+                <span>{{ user.last_name || '-' }}</span>
+              </div>
+
+              <div class="info-item">
+                <label>Email</label>
+                <span>{{ user.email }}</span>
+              </div>
+
+              <div class="info-item">
+                <label>Teléfono</label>
+                <span>{{ user.phone || '-' }}</span>
+              </div>
+
+              <div class="info-item">
+                <label>ID de Usuario</label>
+                <span class="user-id">{{ user.id }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status and Security Section -->
+      <div class="detail-section status-section">
+        <div class="section-header">
+          <h2>Estado y Seguridad</h2>
+        </div>
+
+        <div class="status-grid">
+          <!-- Current Status -->
+          <div class="status-card">
+            <div class="status-header">
+              <h3>Estado Actual</h3>
+              <div class="status-badge" [style.background-color]="getStatusColor(user.status)">
+                {{ getStatusText(user.status) }}
+              </div>
+            </div>
+            
+            <div class="status-actions">
+              <label>Cambiar estado:</label>
+              <select [value]="user.status" (change)="onStatusChange($event)">
+                <option value="active">Activo</option>
+                <option value="inactive">Inactivo</option>
+                <option value="suspended">Suspendido</option>
+                <option value="pending_verification">Pendiente de Verificación</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Admin Privileges -->
+          <div class="status-card">
+            <div class="status-header">
+              <h3>Privilegios</h3>
+              <div class="privilege-badge" [class.admin]="user.is_admin">
+                {{ user.is_admin ? '👑 Administrador' : '👤 Usuario' }}
+              </div>
+            </div>
+            
+            <div class="status-actions">
+              <label class="toggle-container">
+                <span>Administrador:</span>
+                <label class="toggle">
+                  <input 
+                    type="checkbox" 
+                    [checked]="user.is_admin"
+                    (change)="onAdminToggle($event)"
+                  >
+                  <span class="toggle-slider"></span>
+                </label>
+              </label>
+            </div>
+          </div>
+
+          <!-- Verification Status -->
+          <div class="status-card">
+            <div class="status-header">
+              <h3>Verificación</h3>
+            </div>
+            
+            <div class="verification-list">
+              <div class="verification-item">
+                <span class="verification-label">Email:</span>
+                <span class="verification-status" [class.verified]="user.email_verified">
+                  {{ user.email_verified ? '✅ Verificado' : '❌ No verificado' }}
+                </span>
+              </div>
+
+              <div class="verification-item">
+                <span class="verification-label">Teléfono:</span>
+                <span class="verification-status" [class.verified]="user.phone_verified">
+                  {{ user.phone_verified ? '✅ Verificado' : '❌ No verificado' }}
+                </span>
+              </div>
+
+              <div class="verification-item">
+                <span class="verification-label">2FA:</span>
+                <span class="verification-status" [class.verified]="user.two_factor_enabled">
+                  {{ user.two_factor_enabled ? '🔐 Habilitado' : '🔓 Deshabilitado' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity Section -->
+      <div class="detail-section activity-section">
+        <div class="section-header">
+          <h2>Actividad</h2>
+        </div>
+
+        <div class="activity-grid">
+          <div class="activity-item">
+            <div class="activity-icon">📅</div>
+            <div class="activity-info">
+              <h4>Registro</h4>
+              <p>{{ formatDate(user.created_at) }}</p>
+            </div>
+          </div>
+
+          <div class="activity-item">
+            <div class="activity-icon">🔄</div>
+            <div class="activity-info">
+              <h4>Última Actualización</h4>
+              <p>{{ formatDate(user.updated_at) }}</p>
+            </div>
+          </div>
+
+          <div class="activity-item" *ngIf="user.last_login_at">
+            <div class="activity-icon">🔑</div>
+            <div class="activity-info">
+              <h4>Último Login</h4>
+              <p>{{ formatDate(user.last_login_at) }}</p>
+            </div>
+          </div>
+
+          <div class="activity-item" *ngIf="!user.last_login_at">
+            <div class="activity-icon">🔑</div>
+            <div class="activity-info">
+              <h4>Último Login</h4>
+              <p>Nunca ha iniciado sesión</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics Section -->
+      <div class="detail-section stats-section">
+        <div class="section-header">
+          <h2>Estadísticas</h2>
+        </div>
+
+        <div class="user-stats">
+          <div class="stat-item">
+            <div class="stat-number">{{ user.oauth_accounts_count || 0 }}</div>
+            <div class="stat-label">Cuentas OAuth</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-number">{{ user.sessions_count || 0 }}</div>
+            <div class="stat-label">Sesiones Activas</div>
+          </div>
+
+          <div class="stat-item">
+            <div class="stat-number">
+              {{ getDaysSinceRegistration() }}
+            </div>
+            <div class="stat-label">Días desde registro</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions Section -->
+      <div class="detail-section actions-section">
+        <div class="section-header">
+          <h2>Acciones Rápidas</h2>
+        </div>
+
+        <div class="quick-actions">
+          <button class="action-btn" routerLink="/admin/audit-logs" [queryParams]="{userId: user.id}">
+            📋 Ver Logs de Auditoría
+          </button>
+
+          <button class="action-btn" (click)="updateUserStatus('suspended')" *ngIf="user.status !== 'suspended'">
+            ⛔ Suspender Usuario
+          </button>
+
+          <button class="action-btn success" (click)="updateUserStatus('active')" *ngIf="user.status !== 'active'">
+            ✅ Activar Usuario
+          </button>
+
+          <button class="action-btn" (click)="updateUserAdmin(!user.is_admin)">
+            {{ user.is_admin ? '📝 Remover Admin' : '👑 Hacer Admin' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

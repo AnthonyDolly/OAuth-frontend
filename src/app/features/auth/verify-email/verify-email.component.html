@@ -1,0 +1,35 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <!-- Loading state -->
+    <div *ngIf="loading" class="loading-content">
+      <div class="loading-spinner"></div>
+      <h2>Verificando email...</h2>
+      <p>Por favor espera mientras verificamos tu dirección de correo.</p>
+    </div>
+
+    <!-- Success state -->
+    <div *ngIf="success && !loading" class="success-content">
+      <div class="success-icon">✅</div>
+      <h2>¡Email verificado!</h2>
+      <p>Tu dirección de correo ha sido verificada exitosamente. Ahora puedes acceder a todas las funcionalidades de tu cuenta.</p>
+      <a routerLink="/auth/login" class="btn btn-primary">
+        Ir al login
+      </a>
+    </div>
+
+    <!-- Error state -->
+    <div *ngIf="error && !loading" class="error-content">
+      <div class="error-icon">❌</div>
+      <h2>Error de verificación</h2>
+      <p>{{ error }}</p>
+      <div class="error-actions">
+        <a routerLink="/auth/login" class="btn btn-outline">
+          Ir al login
+        </a>
+        <a routerLink="/auth/register" class="btn btn-primary">
+          Registrarse
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

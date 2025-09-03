@@ -1,0 +1,191 @@
+<div class="profile-container">
+  <!-- Header -->
+  <div class="profile-header">
+    <div class="header-content">
+      <button class="back-btn" routerLink="/dashboard">
+        ← Volver al Dashboard
+      </button>
+      <h1>Mi Perfil</h1>
+    </div>
+  </div>
+
+  <div class="profile-content" *ngIf="user">
+    <!-- Profile summary -->
+    <div class="profile-summary">
+      <div class="avatar-section">
+        <div class="user-avatar">
+          <img *ngIf="user.avatar_url" [src]="user.avatar_url" [alt]="user.display_name || user.email">
+          <div *ngIf="!user.avatar_url" class="avatar-initials">
+            {{ getInitials(user) }}
+          </div>
+        </div>
+        <div class="user-info">
+          <h2>{{ user.display_name || user.first_name || user.email.split('@')[0] }}</h2>
+          <p class="email">{{ user.email }}</p>
+          <div class="status-badge" [style.background-color]="getStatusColor(user.status)">
+            {{ user.status }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile form -->
+    <div class="profile-form-section">
+      <h3>Información Personal</h3>
+      
+      <!-- Messages -->
+      <div class="success-message" *ngIf="success">
+        <i class="success-icon">✅</i>
+        {{ success }}
+      </div>
+      
+      <div class="error-message" *ngIf="error">
+        <i class="error-icon">⚠️</i>
+        {{ error }}
+      </div>
+
+      <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="profile-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="first_name">Nombre</label>
+            <input
+              id="first_name"
+              type="text"
+              formControlName="first_name"
+              placeholder="Tu nombre"
+              [class.error]="isFieldInvalid('first_name')"
+            >
+            <div class="field-error" *ngIf="isFieldInvalid('first_name')">
+              {{ getFieldError('first_name') }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="last_name">Apellido</label>
+            <input
+              id="last_name"
+              type="text"
+              formControlName="last_name"
+              placeholder="Tu apellido"
+              [class.error]="isFieldInvalid('last_name')"
+            >
+            <div class="field-error" *ngIf="isFieldInvalid('last_name')">
+              {{ getFieldError('last_name') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="display_name">Nombre para mostrar</label>
+          <input
+            id="display_name"
+            type="text"
+            formControlName="display_name"
+            placeholder="Nombre público"
+            [class.error]="isFieldInvalid('display_name')"
+          >
+          <div class="field-error" *ngIf="isFieldInvalid('display_name')">
+            {{ getFieldError('display_name') }}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="phone">Teléfono</label>
+            <input
+              id="phone"
+              type="tel"
+              formControlName="phone"
+              placeholder="+1234567890"
+              [class.error]="isFieldInvalid('phone')"
+            >
+            <div class="field-error" *ngIf="isFieldInvalid('phone')">
+              {{ getFieldError('phone') }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="date_of_birth">Fecha de Nacimiento</label>
+            <input
+              id="date_of_birth"
+              type="date"
+              formControlName="date_of_birth"
+              [class.error]="isFieldInvalid('date_of_birth')"
+            >
+            <div class="field-error" *ngIf="isFieldInvalid('date_of_birth')">
+              {{ getFieldError('date_of_birth') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="gender">Género</label>
+            <select id="gender" formControlName="gender">
+              <option value="">Seleccionar</option>
+              <option value="male">Masculino</option>
+              <option value="female">Femenino</option>
+              <option value="other">Otro</option>
+              <option value="prefer_not_to_say">Prefiero no decir</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="locale">Idioma</label>
+            <select id="locale" formControlName="locale">
+              <option value="">Seleccionar</option>
+              <option value="es">Español</option>
+              <option value="en">English</option>
+              <option value="fr">Français</option>
+              <option value="de">Deutsch</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="timezone">Zona Horaria</label>
+          <select id="timezone" formControlName="timezone">
+            <option value="">Seleccionar</option>
+            <option value="America/New_York">America/New_York</option>
+            <option value="America/Chicago">America/Chicago</option>
+            <option value="America/Denver">America/Denver</option>
+            <option value="America/Los_Angeles">America/Los_Angeles</option>
+            <option value="Europe/Madrid">Europe/Madrid</option>
+            <option value="Europe/London">Europe/London</option>
+            <option value="Europe/Paris">Europe/Paris</option>
+            <option value="America/Mexico_City">America/Mexico_City</option>
+          </select>
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="loading"
+          >
+            <span *ngIf="!loading">Guardar Cambios</span>
+            <span *ngIf="loading" class="loading-spinner">Guardando...</span>
+          </button>
+          
+          <button type="button" class="btn btn-outline" routerLink="/dashboard">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="danger-zone">
+      <h3>Zona de Peligro</h3>
+      <div class="danger-content">
+        <div class="danger-info">
+          <h4>Eliminar Cuenta</h4>
+          <p>Una vez eliminada, tu cuenta no podrá recuperarse. Esta acción es permanente.</p>
+        </div>
+        <button class="btn btn-danger" (click)="deleteAccount()">
+          Eliminar Cuenta
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

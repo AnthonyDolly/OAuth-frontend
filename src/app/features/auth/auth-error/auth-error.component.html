@@ -1,0 +1,29 @@
+<div class="auth-error-container">
+  <div class="error-card">
+    <div class="error-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    </div>
+    
+    <div class="error-content">
+      <h1>Error de Autenticación</h1>
+      <p class="error-type">{{ error }}</p>
+      <p class="error-message">{{ message }}</p>
+      
+      <div class="error-actions">
+        <button type="button" class="btn btn-primary" (click)="retry()">
+          Reintentar
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="goToLogin()">
+          Volver al Login
+        </button>
+      </div>
+      
+      <div class="help-text">
+        <p>Si el problema persiste, por favor contacta al soporte técnico.</p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,236 @@
+<div class="dashboard-container" *ngIf="!loading; else loadingTemplate">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <div class="user-info">
+        <div class="user-avatar" *ngIf="user">
+          <img *ngIf="user.avatar_url" [src]="user.avatar_url" [alt]="user.display_name || user.email">
+          <div *ngIf="!user.avatar_url" class="avatar-initials">
+            {{ getInitials(user) }}
+          </div>
+        </div>
+        <div class="user-details">
+          <!-- Mostrar mensaje de carga si estamos autenticados pero no tenemos usuario -->
+          <div *ngIf="authServicePublic.isAuthenticated() && !user; else userGreeting">
+            <h1>Cargando tu información... 🔄</h1>
+            <p>Por favor espera un momento</p>
+          </div>
+          <!-- Saludo normal cuando hay usuario -->
+          <ng-template #userGreeting>
+            <div *ngIf="user">
+              <h1>¡Hola, {{ user.display_name || user.first_name || user.email.split('@')[0] }}! 👋</h1>
+              <p>Bienvenido a tu dashboard personal</p>
+            </div>
+            <!-- Mensaje cuando no hay usuario y no estamos autenticados -->
+            <div *ngIf="!user && !authServicePublic.isAuthenticated()">
+              <h1>Acceso no autorizado</h1>
+              <p>Serás redirigido al login...</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button 
+          class="btn btn-outline" 
+          routerLink="/profile"
+          data-tooltip="Ver y editar tu información personal">
+          <i class="icon">👤</i>
+          Mi Perfil
+        </button>
+        <button 
+          class="btn btn-danger" 
+          (click)="logout()"
+          data-tooltip="Cerrar sesión y salir del sistema">
+          <i class="icon">🚪</i>
+          Cerrar Sesión
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="dashboard-main">
+    <!-- Quick stats -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+          <h3>Estado de la Cuenta</h3>
+          <div class="status-badge" *ngIf="user" [style.background-color]="getStatusColor(user.status)">
+            {{ user.status }}
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">🔐</div>
+        <div class="stat-content">
+          <h3>Seguridad</h3>
+          <div class="security-status">
+            <span [class.verified]="user?.email_verified">
+              Email {{ user?.email_verified ? '✅' : '❌' }}
+            </span>
+            <span [class.verified]="user?.two_factor_enabled">
+              2FA {{ user?.two_factor_enabled ? '✅' : '❌' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">📱</div>
+        <div class="stat-content">
+          <h3>Sesiones Activas</h3>
+          <div class="stat-number">{{ activeSessions.length }}</div>
+        </div>
+      </div>
+
+      <div class="stat-card" *ngIf="securityInfo">
+        <div class="stat-icon">🔑</div>
+        <div class="stat-content">
+          <h3>Último Login</h3>
+                      <div class="stat-text">
+              {{ securityInfo.last_login_at ? formatDate(securityInfo.last_login_at.toString()) : 'Nunca' }}
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick actions -->
+    <section class="quick-actions">
+      <h2>Acciones Rápidas</h2>
+      <div class="actions-grid">
+        <a 
+          routerLink="/profile" 
+          class="action-card"
+          data-tooltip="Edita tu perfil personal y configuración">
+          <div class="action-icon">👤</div>
+          <div class="action-content">
+            <h3>Editar Perfil</h3>
+            <p>Actualiza tu información personal</p>
+          </div>
+          <div class="action-arrow">→</div>
+        </a>
+
+        <a 
+          routerLink="/security" 
+          class="action-card"
+          data-tooltip="Configura tu seguridad y autenticación">
+          <div class="action-icon">🔐</div>
+          <div class="action-content">
+            <h3>Configuración de Seguridad</h3>
+            <p>2FA, cambio de contraseña y más</p>
+          </div>
+          <div class="action-arrow">→</div>
+        </a>
+
+        <a 
+          routerLink="/oauth-accounts" 
+          class="action-card"
+          data-tooltip="Vincula o desvincula cuentas externas">
+          <div class="action-icon">🔗</div>
+          <div class="action-content">
+            <h3>Cuentas Vinculadas</h3>
+            <p>Gestiona tus cuentas OAuth</p>
+          </div>
+          <div class="action-arrow">→</div>
+        </a>
+
+        <a 
+          routerLink="/api-explorer" 
+          class="action-card"
+          data-tooltip="Prueba y explora la API del sistema">
+          <div class="action-icon">🔧</div>
+          <div class="action-content">
+            <h3>API Explorer</h3>
+            <p>Explora y prueba las APIs disponibles</p>
+          </div>
+          <div class="action-arrow">→</div>
+        </a>
+
+        <a 
+          routerLink="/admin/stats" 
+          class="action-card" 
+          *ngIf="user?.is_admin"
+          data-tooltip="Panel de administración del sistema">
+          <div class="action-icon">⚙️</div>
+          <div class="action-content">
+            <h3>Panel de Admin</h3>
+            <p>Gestionar usuarios y sistema</p>
+          </div>
+          <div class="action-arrow">→</div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Active sessions -->
+    <section class="sessions-section">
+      <div class="section-header">
+        <h2>🔄 Sesiones Activas</h2>
+        <button 
+          class="btn btn-outline btn-sm" 
+          (click)="revokeAllSessions()" 
+          *ngIf="activeSessions.length > 1"
+          data-tooltip="Cerrar todas las sesiones excepto la actual">
+          Cerrar Todas las Sesiones
+        </button>
+      </div>
+      
+      <!-- No sessions message -->
+      <div *ngIf="activeSessions.length === 0" class="no-sessions">
+        <div class="info-container">
+          <div class="info-icon">🔄</div>
+          <h3>No hay sesiones activas</h3>
+          <p>Tu sesión actual es la única activa. Si has cerrado otras sesiones recientemente, los cambios pueden tardar unos momentos en reflejarse.</p>
+          <div class="info-actions">
+            <button class="btn btn-outline btn-sm" (click)="refreshSessions()">
+              <i class="refresh-icon">🔄</i>
+              Actualizar
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="sessions-list" *ngIf="activeSessions.length > 0">
+        <div 
+          *ngFor="let session of activeSessions; trackBy: trackBySessionId" 
+          class="session-card"
+          [class.current]="session.is_current"
+        >
+          <div class="session-info">
+            <div class="session-details">
+              <h4>{{ session.browser || 'Navegador Desconocido' }}</h4>
+              <p>{{ session.location_display || session.ip_address || 'IP no disponible' }}</p>
+              <p class="session-device">{{ session.os }} - {{ session.device_type }}</p>
+              <span class="session-time">
+                Último acceso: {{ formatDate(session.last_accessed_at) }}
+              </span>
+            </div>
+            <div class="session-badge" *ngIf="session.is_current">
+              Sesión Actual
+            </div>
+          </div>
+          
+          <button 
+            *ngIf="!session.is_current"
+            class="btn btn-danger btn-sm"
+            (click)="revokeSession(session.id)"
+            data-tooltip="Cerrar esta sesión específica">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Loading template -->
+<ng-template #loadingTemplate>
+  <div class="loading-container">
+    <div class="loading-content">
+      <div class="loading-spinner pulse"></div>
+      <h3>🚀 Cargando Dashboard</h3>
+      <p>Preparando tu experiencia personalizada...</p>
+    </div>
+  </div>
+</ng-template>

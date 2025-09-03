@@ -1,0 +1,420 @@
+<div class="security-container">
+  <!-- Header -->
+  <div class="security-header">
+    <div class="header-content">
+      <button class="back-btn" routerLink="/dashboard">
+        ← Volver al Dashboard
+      </button>
+      <h1>Configuración de Seguridad</h1>
+    </div>
+  </div>
+
+  <div class="security-content">
+    <!-- Global Messages (for non-2FA operations) -->
+    <div class="success-message" *ngIf="success && !show2FASetup">
+      <i class="success-icon">✅</i>
+      {{ success }}
+    </div>
+
+    <div class="error-message" *ngIf="error && !show2FASetup">
+      <i class="error-icon">⚠️</i>
+      {{ error }}
+    </div>
+
+    <!-- Security Overview -->
+    <div class="security-section" *ngIf="securityInfo">
+      <h2>Resumen de Seguridad</h2>
+      <div class="security-stats">
+        <div class="security-stat">
+          <div class="stat-icon">🔐</div>
+          <div class="stat-info">
+            <h3>Autenticación de Dos Factores</h3>
+            <p [class.enabled]="securityInfo.two_factor_enabled">
+              {{ securityInfo.two_factor_enabled ? 'Habilitado' : 'Deshabilitado' }}
+            </p>
+          </div>
+          <button 
+            class="btn" 
+            [class.btn-success]="!securityInfo.two_factor_enabled"
+            [class.btn-danger]="securityInfo.two_factor_enabled"
+            (click)="securityInfo.two_factor_enabled ? disable2FA() : enable2FA()"
+            [disabled]="loading"
+          >
+            {{ securityInfo.two_factor_enabled ? 'Deshabilitar' : 'Habilitar' }}
+          </button>
+        </div>
+
+        <div class="security-stat">
+          <div class="stat-icon">📧</div>
+          <div class="stat-info">
+            <h3>Email Verificado</h3>
+            <p [class.enabled]="securityInfo.email_verified">
+              {{ securityInfo.email_verified ? 'Verificado' : 'No verificado' }}
+            </p>
+          </div>
+        </div>
+
+        <div class="security-stat">
+          <div class="stat-icon">📱</div>
+          <div class="stat-info">
+            <h3>Teléfono Verificado</h3>
+            <p [class.enabled]="securityInfo.phone_verified">
+              {{ securityInfo.phone_verified ? 'Verificado' : 'No verificado' }}
+            </p>
+          </div>
+          <button
+            *ngIf="!securityInfo.phone_verified"
+            class="btn btn-outline"
+            (click)="navigateToPhoneVerification()"
+          >
+            Verificar
+          </button>
+        </div>
+
+        <div class="security-stat">
+          <div class="stat-icon">🔑</div>
+          <div class="stat-info">
+            <h3>Último Login</h3>
+            <p>
+              {{ securityInfo.last_login_at ? formatDate(securityInfo.last_login_at.toString()) : 'Nunca' }}
+            </p>
+            <small *ngIf="securityInfo.last_login_ip">IP: {{ securityInfo.last_login_ip }}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2FA Messages (specific to 2FA operations) -->
+    <div class="success-message" *ngIf="twoFAMessage">
+      <i class="success-icon">✅</i>
+      {{ twoFAMessage }}
+    </div>
+
+    <!-- 2FA Setup -->
+    <div class="security-section" *ngIf="show2FASetup">
+      <h2>Configurar Autenticación de Dos Factores</h2>
+      <div class="twofa-setup">
+
+        <!-- Step 1: QR Code and Backup Codes -->
+        <div *ngIf="!show2FAVerification" class="setup-step">
+          <div class="step-indicator">
+            <span class="step-number active">1</span>
+            <span class="step-title">Configura tu app de autenticación</span>
+          </div>
+
+          <div class="qr-section">
+            <h3>📱 Escanea el código QR</h3>
+            <img [src]="qrCode" alt="QR Code para 2FA" class="qr-code">
+            <p>Usa una app como Google Authenticator, Authy o Microsoft Authenticator para escanear este código.</p>
+          </div>
+
+          <div class="backup-codes" *ngIf="backupCodes.length > 0">
+            <h3>🔐 Códigos de Respaldo</h3>
+            <p class="backup-warning">⚠️ <strong>IMPORTANTE:</strong> Guarda estos códigos en un lugar seguro. Puedes usarlos si pierdes acceso a tu dispositivo.</p>
+            <div class="codes-list">
+              <code *ngFor="let code of backupCodes; trackBy: trackByCode">{{ code }}</code>
+            </div>
+            <div class="backup-actions">
+              <button class="btn btn-outline" (click)="copyBackupCodes()">
+                📋 Copiar Códigos
+              </button>
+              <button class="btn btn-outline" (click)="downloadBackupCodes()">
+                💾 Descargar Códigos
+              </button>
+            </div>
+          </div>
+
+          <div class="step-actions">
+            <button class="btn btn-outline" (click)="cancel2FASetup()">
+              Cancelar
+            </button>
+            <button class="btn btn-primary" (click)="proceedToVerification()">
+              Continuar →
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2: TOTP Verification -->
+        <div *ngIf="show2FAVerification" class="setup-step">
+          <div class="step-indicator">
+            <span class="step-number active">2</span>
+            <span class="step-title">Verifica tu configuración</span>
+          </div>
+
+          <div class="verification-section">
+            <h3>🔢 Ingresa el código de verificación</h3>
+            <p>Ingresa el código de 6 dígitos que aparece en tu app de autenticación.</p>
+
+            <div class="verification-form">
+              <input
+                type="text"
+                [(ngModel)]="verificationCode"
+                placeholder="000000"
+                maxlength="6"
+                class="verification-input"
+                (keyup.enter)="verifyTOTPCode()"
+                [disabled]="loading"
+              >
+
+              <button
+                class="btn btn-primary"
+                (click)="verifyTOTPCode()"
+                [disabled]="loading || !verificationCode || verificationCode.length !== 6"
+              >
+                <span *ngIf="!loading">Verificar Código</span>
+                <span *ngIf="loading" class="loading-spinner">Verificando...</span>
+              </button>
+            </div>
+
+            <div *ngIf="verificationError" class="verification-error">
+              ❌ {{ verificationError }}
+            </div>
+
+            <div class="verification-help">
+              <p>¿No funciona el código?</p>
+              <ul>
+                <li>Asegúrate de que la hora de tu dispositivo esté correcta</li>
+                <li>Espera 30 segundos para que se genere un nuevo código</li>
+                <li>Verifica que hayas escaneado correctamente el código QR</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step-actions">
+            <button class="btn btn-outline" (click)="show2FAVerification = false">
+              ← Volver
+            </button>
+            <button class="btn btn-danger" (click)="cancel2FASetup()">
+              Cancelar Configuración
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="security-section">
+      <h2>Cambiar Contraseña</h2>
+
+      <!-- Éxito específico para el formulario de cambio de contraseña -->
+      <div class="success-message" *ngIf="passwordSuccess">
+        <i class="success-icon">✅</i>
+        {{ passwordSuccess }}
+      </div>
+
+      <!-- Error específico para el formulario de cambio de contraseña -->
+      <div class="error-message" *ngIf="passwordError">
+        <i class="error-icon">⚠️</i>
+        {{ passwordError }}
+      </div>
+
+      <form [formGroup]="changePasswordForm" (ngSubmit)="onChangePassword()" class="password-form">
+        <div class="form-group">
+          <label for="current_password">Contraseña Actual</label>
+          <input
+            id="current_password"
+            type="password"
+            formControlName="current_password"
+            placeholder="Tu contraseña actual"
+            [class.error]="isFieldInvalid(changePasswordForm, 'current_password')"
+          >
+          <div class="field-error" *ngIf="isFieldInvalid(changePasswordForm, 'current_password')">
+            {{ getFieldError(changePasswordForm, 'current_password') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="new_password">Nueva Contraseña</label>
+          <input
+            id="new_password"
+            type="password"
+            formControlName="new_password"
+            placeholder="Nueva contraseña (mín. 8 caracteres)"
+            [class.error]="isFieldInvalid(changePasswordForm, 'new_password')"
+          >
+          <div class="field-error" *ngIf="isFieldInvalid(changePasswordForm, 'new_password')">
+            {{ getFieldError(changePasswordForm, 'new_password') }}
+          </div>
+          <div class="field-help">
+            La contraseña debe contener al menos 8 caracteres, una mayúscula, una minúscula y un número.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirm_password">Confirmar Nueva Contraseña</label>
+          <input
+            id="confirm_password"
+            type="password"
+            formControlName="confirm_password"
+            placeholder="Repite la nueva contraseña"
+            [class.error]="isFieldInvalid(changePasswordForm, 'confirm_password')"
+          >
+          <div class="field-error" *ngIf="isFieldInvalid(changePasswordForm, 'confirm_password')">
+            {{ getFieldError(changePasswordForm, 'confirm_password') }}
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="loading || changePasswordForm.invalid"
+        >
+          <span *ngIf="!loading">Cambiar Contraseña</span>
+          <span *ngIf="loading" class="loading-spinner">Cambiando...</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Phone Verification Section -->
+    <div class="security-section phone-verification-section" *ngIf="showPhoneVerificationSection">
+      <div class="section-header">
+        <h2>Verificar Teléfono</h2>
+        <p>Agrega verificación de dos factores a tu cuenta mediante SMS</p>
+      </div>
+
+      <!-- Phone Verification Messages -->
+      <div class="success-message" *ngIf="success && showPhoneVerificationSection">
+        <i class="success-icon">✅</i>
+        {{ success }}
+      </div>
+
+      <div class="error-message" *ngIf="error && showPhoneVerificationSection">
+        <i class="error-icon">⚠️</i>
+        {{ error }}
+      </div>
+
+      <form [formGroup]="phoneVerificationForm" class="phone-verification-content">
+        <div class="verification-step" *ngIf="!phoneVerificationSent">
+          <div class="step-icon">📞</div>
+          <h3>Paso 1: Ingresa tu número de teléfono</h3>
+          <p>Te enviaremos un código de verificación por SMS</p>
+
+          <div class="phone-input-section">
+            <input
+              id="phone"
+              type="tel"
+              placeholder="+1234567890"
+              formControlName="phone"
+              autocomplete="tel"
+              [class.error]="isFieldInvalid(phoneVerificationForm, 'phone')"
+              (input)="onPhoneInputChange()"
+            >
+            <button
+              class="btn btn-primary"
+              (click)="sendPhoneVerification()"
+              [disabled]="isSendButtonDisabled()"
+            >
+              <span *ngIf="!loading">📤 Enviar Código</span>
+              <span *ngIf="loading" class="loading-spinner">Enviando...</span>
+            </button>
+          </div>
+
+          <div class="field-error" *ngIf="isFieldInvalid(phoneVerificationForm, 'phone')">
+            {{ getFieldError(phoneVerificationForm, 'phone') }}
+          </div>
+        </div>
+
+        <div class="verification-step" *ngIf="phoneVerificationSent">
+          <div class="step-icon">🔢</div>
+          <h3>Paso 2: Ingresa el código de verificación</h3>
+          <p>Revisa tu teléfono e ingresa el código de 6 dígitos que recibiste</p>
+
+          <div class="code-input-section">
+            <input
+              id="code"
+              type="text"
+              placeholder="123456"
+              maxlength="6"
+              formControlName="code"
+              autocomplete="one-time-code"
+              [class.error]="isFieldInvalid(phoneVerificationForm, 'code')"
+              (input)="onCodeInputChange()"
+            >
+            <button
+              class="btn btn-success"
+              (click)="verifyPhone()"
+              [disabled]="isVerifyButtonDisabled()"
+            >
+              <span *ngIf="!loading">✅ Verificar Código</span>
+              <span *ngIf="loading" class="loading-spinner">Verificando...</span>
+            </button>
+          </div>
+
+          <div class="field-error" *ngIf="isFieldInvalid(phoneVerificationForm, 'code')">
+            {{ getFieldError(phoneVerificationForm, 'code') }}
+          </div>
+
+          <div class="verification-help">
+            <p>¿No recibiste el código?</p>
+            <ul>
+              <li>Espera unos segundos, puede tardar en llegar</li>
+              <li>Revisa tu carpeta de spam o mensajes no deseados</li>
+              <li>Asegúrate de que tu número de teléfono sea correcto</li>
+              <li><button class="btn-link" (click)="phoneVerificationSent = false; phoneVerificationForm.patchValue({ code: '' })">Cambiar número de teléfono</button></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-actions">
+          <button class="btn btn-outline" (click)="cancelPhoneVerification()">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Old Phone Verification (kept for backward compatibility) -->
+    <div class="security-section" *ngIf="showPhoneVerification">
+      <h2>Verificar Teléfono</h2>
+      <form [formGroup]="phoneVerificationForm" class="phone-form">
+        <div class="form-group" *ngIf="!phoneVerificationSent">
+          <label for="phone">Número de Teléfono</label>
+          <input
+            id="phone"
+            type="tel"
+            formControlName="phone"
+            placeholder="+1234567890"
+            [class.error]="isFieldInvalid(phoneVerificationForm, 'phone')"
+          >
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="sendPhoneVerification()"
+            [disabled]="loading"
+          >
+            Enviar Código
+          </button>
+        </div>
+
+        <div class="form-group" *ngIf="phoneVerificationSent">
+          <label for="code">Código de Verificación</label>
+          <input
+            id="code"
+            type="text"
+            formControlName="code"
+            placeholder="123456"
+            maxlength="6"
+            [class.error]="isFieldInvalid(phoneVerificationForm, 'code')"
+          >
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="verifyPhone()"
+            [disabled]="loading"
+          >
+            Verificar
+          </button>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-outline"
+          (click)="showPhoneVerification = false; phoneVerificationSent = false; phoneVerificationForm.reset()"
+        >
+          Cancelar
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

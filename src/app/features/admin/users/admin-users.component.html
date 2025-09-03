@@ -1,0 +1,277 @@
+<div class="admin-container">
+  <!-- Header -->
+  <div class="admin-header">
+    <div class="header-content">
+      <div class="header-info">
+        <button class="back-btn" routerLink="/dashboard">
+          ← Volver al Dashboard
+        </button>
+        <h1>Gestión de Usuarios</h1>
+        <p>Administra las cuentas de usuario del sistema</p>
+      </div>
+      
+      <div class="header-actions">
+        <button class="btn btn-outline" (click)="exportUsers()" [disabled]="loading">
+          📥 Exportar CSV
+        </button>
+        <button class="btn btn-primary" (click)="loadUsers()" [disabled]="loading">
+          <span *ngIf="!loading">🔄 Actualizar</span>
+          <span *ngIf="loading">Cargando...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="admin-nav">
+    <nav class="nav-content">
+      <a routerLink="/admin/stats" routerLinkActive="active" class="nav-item">
+        📊 Estadísticas
+      </a>
+      <a routerLink="/admin/users" routerLinkActive="active" class="nav-item">
+        👥 Usuarios
+      </a>
+      <a routerLink="/admin/audit-logs" routerLinkActive="active" class="nav-item">
+        📋 Logs de Auditoría
+      </a>
+    </nav>
+  </div>
+
+  <div class="admin-content">
+    <!-- Messages -->
+    <div class="success-message" *ngIf="success">
+      <i class="success-icon">✅</i>
+      {{ success }}
+    </div>
+    
+    <div class="error-message" *ngIf="error">
+      <i class="error-icon">⚠️</i>
+      {{ error }}
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-section">
+      <form [formGroup]="filterForm" class="filters-form">
+        <div class="filter-group">
+          <label for="q">Buscar</label>
+          <input
+            id="q"
+            type="text"
+            formControlName="q"
+            placeholder="Email, nombre..."
+          >
+        </div>
+
+        <div class="filter-group">
+          <label for="status">Estado</label>
+          <select id="status" formControlName="status">
+            <option value="">Todos los estados</option>
+            <option value="active">Activo</option>
+            <option value="inactive">Inactivo</option>
+            <option value="suspended">Suspendido</option>
+            <option value="pending_verification">Pendiente</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="email_verified">Email Verificado</label>
+          <select id="email_verified" formControlName="email_verified">
+            <option value="">Todos</option>
+            <option value="true">Verificado</option>
+            <option value="false">No Verificado</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="two_factor_enabled">2FA</label>
+          <select id="two_factor_enabled" formControlName="two_factor_enabled">
+            <option value="">Todos</option>
+            <option value="true">Habilitado</option>
+            <option value="false">Deshabilitado</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="from">Desde</label>
+          <input id="from" type="date" formControlName="from">
+        </div>
+
+        <div class="filter-group">
+          <label for="to">Hasta</label>
+          <input id="to" type="date" formControlName="to">
+        </div>
+
+        <div class="filter-actions">
+          <button type="button" class="btn btn-outline" (click)="clearFilters()">
+            Limpiar
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Users Summary -->
+    <div class="summary-section">
+      <div class="summary-info">
+        <span class="total-count">{{ totalUsers | number }} usuarios encontrados</span>
+        <span class="page-info">
+          Página {{ currentPage }} de {{ totalPages }}
+        </span>
+      </div>
+      
+      <div class="page-size-selector">
+        <label>Mostrar:</label>
+        <select (change)="onPageSizeChange($event)" [value]="pageSize">
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-container" *ngIf="loading">
+      <div class="loading-spinner"></div>
+      <p>Cargando usuarios...</p>
+    </div>
+
+    <!-- Users Table -->
+    <div class="users-table-container" *ngIf="!loading">
+      <div class="table-wrapper">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Estado</th>
+              <th>Verificación</th>
+              <th>Privilegios</th>
+              <th>Registro</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users" class="user-row">
+              <td class="user-info">
+                <div class="user-avatar">
+                  <img *ngIf="user.avatar_url" [src]="user.avatar_url" [alt]="user.email">
+                  <div *ngIf="!user.avatar_url" class="avatar-placeholder">
+                    {{ user.email.charAt(0).toUpperCase() }}
+                  </div>
+                </div>
+                <div class="user-details">
+                  <h4>{{ user.display_name || (user.first_name + ' ' + user.last_name).trim() || user.email.split('@')[0] }}</h4>
+                  <p>{{ user.email }}</p>
+                  <small *ngIf="user.phone">📱 {{ user.phone }}</small>
+                </div>
+              </td>
+
+              <td class="user-status">
+                <div class="status-selector">
+                  <select 
+                    [value]="user.status"
+                    (change)="onStatusChange($event, user.id)"
+                    [style.color]="getStatusColor(user.status)"
+                  >
+                    <option value="active">Activo</option>
+                    <option value="inactive">Inactivo</option>
+                    <option value="suspended">Suspendido</option>
+                    <option value="pending_verification">Pendiente</option>
+                  </select>
+                </div>
+              </td>
+
+              <td class="user-verification">
+                <div class="verification-badges">
+                  <span class="badge" [class.verified]="user.email_verified">
+                    {{ user.email_verified ? '📧 ✅' : '📧 ❌' }}
+                  </span>
+                  <span class="badge" [class.verified]="user.phone_verified">
+                    {{ user.phone_verified ? '📱 ✅' : '📱 ❌' }}
+                  </span>
+                  <span class="badge" [class.verified]="user.two_factor_enabled">
+                    {{ user.two_factor_enabled ? '🔐 ✅' : '🔐 ❌' }}
+                  </span>
+                </div>
+              </td>
+
+              <td class="user-privileges">
+                <div class="admin-toggle">
+                  <label class="toggle">
+                    <input 
+                      type="checkbox" 
+                      [checked]="user.is_admin"
+                      (change)="onAdminToggle($event, user.id)"
+                    >
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <span class="toggle-label">
+                    {{ user.is_admin ? 'Admin' : 'Usuario' }}
+                  </span>
+                </div>
+              </td>
+
+              <td class="user-dates">
+                <div class="date-info">
+                  <span class="created">{{ formatDate(user.created_at) }}</span>
+                  <small *ngIf="user.last_login_at">
+                    Último login: {{ formatDate(user.last_login_at) }}
+                  </small>
+                </div>
+              </td>
+
+              <td class="user-actions">
+                <div class="action-buttons">
+                  <a [routerLink]="['/admin/users', user.id]" class="btn btn-sm btn-outline">
+                    👁️ Ver
+                  </a>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="users.length === 0">
+          <div class="empty-icon">👥</div>
+          <h3>No se encontraron usuarios</h3>
+          <p>Intenta ajustar los filtros de búsqueda</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-section" *ngIf="!loading && users.length > 0">
+      <div class="pagination">
+        <button 
+          class="btn btn-outline btn-sm"
+          (click)="changePage(currentPage - 1)"
+          [disabled]="currentPage === 1"
+        >
+          ← Anterior
+        </button>
+
+        <button
+          *ngFor="let page of getPaginationRange()"
+          class="btn btn-sm"
+          [class.btn-primary]="page === currentPage"
+          [class.btn-outline]="page !== currentPage"
+          (click)="changePage(page)"
+        >
+          {{ page }}
+        </button>
+
+        <button 
+          class="btn btn-outline btn-sm"
+          (click)="changePage(currentPage + 1)"
+          [disabled]="currentPage === totalPages"
+        >
+          Siguiente →
+        </button>
+      </div>
+
+      <div class="pagination-info">
+        Mostrando {{ ((currentPage - 1) * pageSize) + 1 }} - {{ getEndRange() }} de {{ totalUsers }}
+      </div>
+    </div>
+  </div>
+</div>

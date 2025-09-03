@@ -1,0 +1,344 @@
+{
+  "info": {
+    "name": "OAuth",
+    "_postman_id": "6d0bb5a0-3a4b-4c1d-9c6b-9d9a1a2b3c4d",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3001/api/v1" },
+    { "key": "access_token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": { "method": "GET", "url": "{{base_url}}/health" }
+        },
+        {
+          "name": "GET /version",
+          "request": { "method": "GET", "url": "{{base_url}}/version" }
+        },
+        {
+          "name": "GET /docs (Swagger UI)",
+          "request": { "method": "GET", "url": "{{base_url}}/docs" }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST /auth/register",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123!\"\n}" },
+            "url": "{{base_url}}/auth/register"
+          }
+        },
+        {
+          "name": "POST /auth/login",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123!\",\n  \"code\": \"123456\",\n  \"backup_code\": \"ABCD1234\"\n}" },
+            "url": "{{base_url}}/auth/login"
+          }
+        },
+        {
+          "name": "POST /auth/refresh",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"refresh_token\": \"<refresh_token>\"\n}" },
+            "url": "{{base_url}}/auth/refresh"
+          }
+        },
+        {
+          "name": "POST /auth/logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"refresh_token\": \"<optional>\",\n  \"revoke_all\": false\n}" },
+            "url": "{{base_url}}/auth/logout"
+          }
+        },
+        {
+          "name": "POST /auth/verify-email",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"token\": \"<email_verify_token>\"\n}" },
+            "url": "{{base_url}}/auth/verify-email"
+          }
+        },
+        {
+          "name": "POST /auth/resend-verification",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\"\n}" },
+            "url": "{{base_url}}/auth/resend-verification"
+          }
+        },
+        {
+          "name": "POST /auth/forgot-password",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\"\n}" },
+            "url": "{{base_url}}/auth/forgot-password"
+          }
+        },
+        {
+          "name": "POST /auth/reset-password",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"token\": \"<reset_token>\",\n  \"new_password\": \"NewPass123!\"\n}" },
+            "url": "{{base_url}}/auth/reset-password"
+          }
+        },
+        {
+          "name": "POST /auth/change-password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"current_password\": \"Password123!\",\n  \"new_password\": \"NewPass123!\"\n}" },
+            "url": "{{base_url}}/auth/change-password"
+          }
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "GET /user/profile",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+            "url": "{{base_url}}/user/profile"
+          }
+        },
+        {
+          "name": "PUT /user/profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\"\n}" },
+            "url": "{{base_url}}/user/profile"
+          }
+        },
+        {
+          "name": "DELETE /user/profile",
+          "request": {
+            "method": "DELETE",
+            "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+            "url": "{{base_url}}/user/profile"
+          }
+        },
+        {
+          "name": "GET /user/sessions",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+            "url": "{{base_url}}/user/sessions"
+          }
+        },
+        {
+          "name": "DELETE /user/sessions/:sessionId",
+          "request": {
+            "method": "DELETE",
+            "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+            "url": {
+              "raw": "{{base_url}}/user/sessions/:sessionId",
+              "host": ["{{base_url}}"],
+              "path": ["user","sessions",":sessionId"],
+              "variable": [ { "key": "sessionId", "value": "<sessionId>" } ]
+            }
+          }
+        },
+        {
+          "name": "DELETE /user/sessions (all)",
+          "request": {
+            "method": "DELETE",
+            "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+            "url": "{{base_url}}/user/sessions"
+          }
+        },
+        {
+          "name": "GET /user/oauth-accounts",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+            "url": "{{base_url}}/user/oauth-accounts"
+          }
+        },
+        {
+          "name": "POST /user/oauth-accounts/link",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"provider\": \"google\",\n  \"provider_id\": \"123\",\n  \"provider_email\": \"user@gmail.com\"\n}" },
+            "url": "{{base_url}}/user/oauth-accounts/link"
+          }
+        },
+        {
+          "name": "DELETE /user/oauth-accounts/:accountId",
+          "request": {
+            "method": "DELETE",
+            "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+            "url": {
+              "raw": "{{base_url}}/user/oauth-accounts/:accountId",
+              "host": ["{{base_url}}"],
+              "path": ["user","oauth-accounts",":accountId"],
+              "variable": [ { "key": "accountId", "value": "<accountId>" } ]
+            }
+          }
+        },
+        {
+          "name": "POST /user/enable-2fa",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+            "url": "{{base_url}}/user/enable-2fa"
+          }
+        },
+        {
+          "name": "POST /user/disable-2fa",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+            "url": "{{base_url}}/user/disable-2fa"
+          }
+        },
+        {
+          "name": "POST /user/verify-2fa",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"123456\"\n}" },
+            "url": "{{base_url}}/user/verify-2fa"
+          }
+        },
+        {
+          "name": "POST /user/backup-codes/regenerate",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+            "url": "{{base_url}}/user/backup-codes/regenerate"
+          }
+        }
+      ]
+    },
+    {
+      "name": "OAuth Providers",
+      "item": [
+        { "name": "GET /oauth/google", "request": { "method": "GET", "url": "{{base_url}}/oauth/google" } },
+        { "name": "GET /oauth/google/callback", "request": { "method": "GET", "url": "{{base_url}}/oauth/google/callback" } },
+        { "name": "GET /oauth/microsoft", "request": { "method": "GET", "url": "{{base_url}}/oauth/microsoft" } },
+        { "name": "GET /oauth/microsoft/callback", "request": { "method": "GET", "url": "{{base_url}}/oauth/microsoft/callback" } },
+        { "name": "GET /oauth/github", "request": { "method": "GET", "url": "{{base_url}}/oauth/github" } },
+        { "name": "GET /oauth/github/callback", "request": { "method": "GET", "url": "{{base_url}}/oauth/github/callback" } },
+        { "name": "GET /oauth/linkedin", "request": { "method": "GET", "url": "{{base_url}}/oauth/linkedin" } },
+        { "name": "GET /oauth/linkedin/callback", "request": { "method": "GET", "url": "{{base_url}}/oauth/linkedin/callback" } }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "GET /admin/users",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+            "url": "{{base_url}}/admin/users?page=1&limit=20&status=active&q=&email_verified=true&two_factor_enabled=&from=&to="
+          }
+        },
+        {
+          "name": "GET /admin/users/:userId",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+            "url": {
+              "raw": "{{base_url}}/admin/users/:userId",
+              "host": ["{{base_url}}"],
+              "path": ["admin","users",":userId"],
+              "variable": [ { "key": "userId", "value": "<userId>" } ]
+            }
+          }
+        },
+        {
+          "name": "PUT /admin/users/:userId/status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"active\"\n}" },
+            "url": {
+              "raw": "{{base_url}}/admin/users/:userId/status",
+              "host": ["{{base_url}}"],
+              "path": ["admin","users",":userId","status"],
+              "variable": [ { "key": "userId", "value": "<userId>" } ]
+            }
+          }
+        },
+        {
+          "name": "PUT /admin/users/:userId/admin",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"is_admin\": true\n}" },
+            "url": {
+              "raw": "{{base_url}}/admin/users/:userId/admin",
+              "host": ["{{base_url}}"],
+              "path": ["admin","users",":userId","admin"],
+              "variable": [ { "key": "userId", "value": "<userId>" } ]
+            }
+          }
+        },
+        {
+          "name": "GET /admin/audit-logs",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+            "url": "{{base_url}}/admin/audit-logs?page=1&limit=50&userId=&action=&success=&from=&to="
+          }
+        },
+        {
+          "name": "GET /admin/stats",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+            "url": "{{base_url}}/admin/stats"
+          }
+        }
+      ]
+    }
+  ]
+}
+
+

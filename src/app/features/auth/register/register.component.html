@@ -1,0 +1,134 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h1>Crear Cuenta</h1>
+      <p>Regístrate para comenzar</p>
+    </div>
+
+    <!-- Success message -->
+    <div class="success-message" *ngIf="success">
+      <i class="success-icon">✅</i>
+      <div>
+        <h3>¡Registro exitoso!</h3>
+        <p>Revisa tu email para verificar tu cuenta antes de iniciar sesión.</p>
+        <a routerLink="/auth/login" class="success-link">Ir al login</a>
+      </div>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form" *ngIf="!success">
+      <!-- Error message -->
+      <div class="error-message" *ngIf="error">
+        <i class="error-icon">⚠️</i>
+        {{ error }}
+      </div>
+
+      <!-- Email field -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="tu@email.com"
+          [class.error]="isFieldInvalid('email')"
+        >
+        <div class="field-error" *ngIf="isFieldInvalid('email')">
+          {{ getFieldError('email') }}
+        </div>
+      </div>
+
+      <!-- Password field -->
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="Mínimo 8 caracteres"
+          [class.error]="isFieldInvalid('password')"
+        >
+        <div class="field-error" *ngIf="isFieldInvalid('password')">
+          {{ getFieldError('password') }}
+        </div>
+        <div class="field-help">
+          La contraseña debe contener al menos 8 caracteres, una mayúscula, una minúscula y un número.
+        </div>
+      </div>
+
+      <!-- Confirm Password field -->
+      <div class="form-group">
+        <label for="confirmPassword">Confirmar Contraseña</label>
+        <input
+          id="confirmPassword"
+          type="password"
+          formControlName="confirmPassword"
+          placeholder="Repite tu contraseña"
+          [class.error]="isFieldInvalid('confirmPassword')"
+        >
+        <div class="field-error" *ngIf="isFieldInvalid('confirmPassword')">
+          {{ getFieldError('confirmPassword') }}
+        </div>
+      </div>
+
+      <!-- Submit button -->
+      <button
+        type="submit"
+        class="auth-button primary"
+        [disabled]="loading"
+      >
+        <span *ngIf="!loading">Crear Cuenta</span>
+        <span *ngIf="loading" class="loading-spinner">Registrando...</span>
+      </button>
+    </form>
+
+    <!-- OAuth buttons -->
+    <div class="oauth-section" *ngIf="!success">
+      <div class="divider">
+        <span>O regístrate con</span>
+      </div>
+      
+      <div class="oauth-buttons">
+        <button
+          type="button"
+          class="oauth-button google"
+          (click)="initiateOAuth('google')"
+        >
+          <i class="oauth-icon">🔍</i>
+          Google
+        </button>
+        
+        <button
+          type="button"
+          class="oauth-button microsoft"
+          (click)="initiateOAuth('microsoft')"
+        >
+          <i class="oauth-icon">🟦</i>
+          Microsoft
+        </button>
+        
+        <button
+          type="button"
+          class="oauth-button github"
+          (click)="initiateOAuth('github')"
+        >
+          <i class="oauth-icon">🐙</i>
+          GitHub
+        </button>
+        
+        <button
+          type="button"
+          class="oauth-button linkedin"
+          (click)="initiateOAuth('linkedin')"
+        >
+          <i class="oauth-icon">💼</i>
+          LinkedIn
+        </button>
+      </div>
+    </div>
+
+    <!-- Links -->
+    <div class="auth-links">
+      <a routerLink="/auth/login">¿Ya tienes cuenta? Inicia sesión</a>
+    </div>
+  </div>
+</div>
